@@ -50,12 +50,17 @@ def backtrack(csp):
     nextVar = select_unassigned_variable(csp)
     for value in order_domain_values(csp, nextVar):
         if is_consistent(csp, nextVar, value):
+	    csp.variables.begin_transaction()
             nextVar.assign(value)
             inferences = inference(csp, nextVar)
             if inferences:
                 # add inferences to assignment
                 if backtrack(csp):
                     return True
+		else:
+		    csp.variables.rollback()
+	    else:
+	        csp.variables.rollback()
         # rollback?
         else:
             nextVar.domain.remove(value)
